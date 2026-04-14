@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://crud-application-1-mat0.onrender.com/api';
+const API_URL = import.meta.env.VITE_API_URL;
 
 const api = axios.create({
   baseURL: API_URL,
@@ -8,6 +8,14 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+api.interceptors.response.use(
+  res => res,
+  err => {
+    console.log(err.response?.data || err.message);
+    return Promise.reject(err);
+  }
+);
 
 export const getUsers = () => api.get('/users');
 export const createUser = (userData) => api.post('/users', userData);

@@ -58,9 +58,9 @@ const createUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { firstName, lastName, email, phone } = req.body;
-    
+
     let user = await User.findById(req.params.id);
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -68,8 +68,8 @@ const updateUser = async (req, res) => {
       });
     }
 
-    // Check email uniqueness (if email is being changed)
-    if (email !== user.email) {
+    // Email check
+    if (email && email !== user.email) {
       const emailExists = await User.findOne({ email });
       if (emailExists) {
         return res.status(400).json({
@@ -79,9 +79,16 @@ const updateUser = async (req, res) => {
       }
     }
 
+    // SAFE UPDATE
+    const updateData = {};
+    if (firstName !== undefined) updateData.firstName = firstName;
+    if (lastName !== undefined) updateData.lastName = lastName;
+    if (email !== undefined) updateData.email = email;
+    if (phone !== undefined) updateData.phone = phone;
+
     user = await User.findByIdAndUpdate(
       req.params.id,
-      { firstName, lastName, email, phone },
+      updateData,
       { new: true, runValidators: true }
     );
 
@@ -89,6 +96,7 @@ const updateUser = async (req, res) => {
       success: true,
       data: user
     });
+
   } catch (error) {
     res.status(400).json({
       success: false,
