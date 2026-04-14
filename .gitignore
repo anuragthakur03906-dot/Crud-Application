@@ -1,0 +1,21 @@
+@"
+# Backend
+backend/node_modules/
+backend/.env
+backend/package-lock.json
+
+# Frontend
+frontend/node_modules/
+frontend/.env
+frontend/dist/
+frontend/.vite/
+frontend/package-lock.json
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+"@ | Out-File -FilePath .gitignore -Encoding utf8
