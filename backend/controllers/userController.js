@@ -1,7 +1,15 @@
 const User = require('../models/User');
 
-// @desc    Get all users
-// @route   GET /api/users
+// ==================== REGEX ====================
+
+// Only letters (allow spaces also)
+const nameRegex = /^[A-Za-z\s]+$/;
+
+// Phone: 10–15 digits only
+const phoneRegex = /^[0-9]{10,15}$/;
+
+
+// ==================== GET USERS ====================
 const getUsers = async (req, res) => {
   try {
     const users = await User.find().sort({ createdAt: -1 });
@@ -19,13 +27,36 @@ const getUsers = async (req, res) => {
   }
 };
 
-// @desc    Create a user
-// @route   POST /api/users
+
+// ==================== CREATE USER ====================
 const createUser = async (req, res) => {
   try {
     const { firstName, lastName, email, phone } = req.body;
 
-    // Check if user exists
+    //  NAME VALIDATION
+    if (!nameRegex.test(firstName)) {
+      return res.status(400).json({
+        success: false,
+        message: 'First name should contain only letters'
+      });
+    }
+
+    if (!nameRegex.test(lastName)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Last name should contain only letters'
+      });
+    }
+
+    //  PHONE VALIDATION
+    if (!phoneRegex.test(phone)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Phone must be 10 to 15 digits only'
+      });
+    }
+
+    //  EMAIL CHECK
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({
@@ -45,6 +76,7 @@ const createUser = async (req, res) => {
       success: true,
       data: user
     });
+
   } catch (error) {
     res.status(400).json({
       success: false,
@@ -53,8 +85,8 @@ const createUser = async (req, res) => {
   }
 };
 
-// @desc    Update a user
-// @route   PUT /api/users/:id
+
+// ==================== UPDATE USER ====================
 const updateUser = async (req, res) => {
   try {
     const { firstName, lastName, email, phone } = req.body;
@@ -68,7 +100,30 @@ const updateUser = async (req, res) => {
       });
     }
 
-    // Email check
+    //  NAME VALIDATION (only if provided)
+    if (firstName && !nameRegex.test(firstName)) {
+      return res.status(400).json({
+        success: false,
+        message: 'First name should contain only letters'
+      });
+    }
+
+    if (lastName && !nameRegex.test(lastName)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Last name should contain only letters'
+      });
+    }
+
+    //  PHONE VALIDATION
+    if (phone && !phoneRegex.test(phone)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Phone must be 10 to 15 digits only'
+      });
+    }
+
+    // EMAIL CHECK
     if (email && email !== user.email) {
       const emailExists = await User.findOne({ email });
       if (emailExists) {
@@ -79,7 +134,7 @@ const updateUser = async (req, res) => {
       }
     }
 
-    // SAFE UPDATE
+    // UPDATE
     const updateData = {};
     if (firstName !== undefined) updateData.firstName = firstName;
     if (lastName !== undefined) updateData.lastName = lastName;
@@ -105,8 +160,8 @@ const updateUser = async (req, res) => {
   }
 };
 
-// @desc    Delete a user
-// @route   DELETE /api/users/:id
+
+// ==================== DELETE USER ====================
 const deleteUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -124,6 +179,7 @@ const deleteUser = async (req, res) => {
       success: true,
       message: 'User deleted successfully'
     });
+
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -131,6 +187,7 @@ const deleteUser = async (req, res) => {
     });
   }
 };
+
 
 module.exports = {
   getUsers,
